@@ -1,7 +1,8 @@
 import * as http from 'http';
 import * as debug from 'debug';
-import config from './config';
+import * as fs from 'fs';
 
+import config from './config';
 import Server from './server';
 
 debug('ts-express:server');
@@ -16,6 +17,9 @@ server.on('error', onError);
 server.on('listening', onListening);
 
 function initServer() {
+  if (!fs.existsSync(config.dir)){
+    fs.mkdirSync(config.dir);
+}
   for (let server of config.servers) {
     
   }
