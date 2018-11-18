@@ -12,11 +12,13 @@ Server.set('port', port);
 
 const server = http.createServer(Server);
 let isMaster = false;
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+initServer();
 
 function initServer() {
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+
   if (!fs.existsSync(config.dir)){
     fs.mkdirSync(config.dir);
 }

@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import * as fs from 'fs';
 import { File } from '../model/File';
+import config from '../config';
 
 
 class DFSRouter {
@@ -11,7 +12,7 @@ class DFSRouter {
     }
     private listFiles(req: Request, res: Response, next: NextFunction) {
         try {
-            let dirPath = './fs/';
+            let dirPath = config.dir + '/';
             let fileDir: File[] = [];
             fs.readdir(dirPath, (err: any, files: string[]) => {
                 if (err) {
