@@ -1,8 +1,9 @@
 class Config {
     public servers = [
-        "dummy stupid server"
+        "http://192.168.150.128:3000/"
     ];
     public dir = './fs';
+    public isMaster = false;
 }
 
 const config = new Config();

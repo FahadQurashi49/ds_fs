@@ -1,9 +1,11 @@
 import * as http from 'http';
 import * as debug from 'debug';
 import * as fs from 'fs';
+import * as request from 'request';
 
 import config from './config';
 import Server from './server';
+import remoteServer from './service/RemoteServer'
 
 debug('ts-express:server');
 
@@ -11,20 +13,27 @@ const port = normalizePort(process.env.PORT || 3000);
 Server.set('port', port);
 
 const server = http.createServer(Server);
-let isMaster = false;
 initServer();
 
 function initServer() {
-  server.listen(port);
-  server.on('error', onError);
-  server.on('listening', onListening);
 
-  if (!fs.existsSync(config.dir)){
+  if (!fs.existsSync(config.dir)) {
     fs.mkdirSync(config.dir);
-}
-  for (let server of config.servers) {
-    
   }
+
+  remoteServer.isAnyAlive().then((isAlive:boolean) => {
+    config.isMaster = !isAlive;
+    if (config.isMaster) {
+      console.log("running server as master!");
+    } else {
+      console.log("running server as slave!");
+    }
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', onListening);
+  });
+  
+
 }
 
 function normalizePort(val: number|string): number|string|boolean {
