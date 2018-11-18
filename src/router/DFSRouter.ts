@@ -39,8 +39,12 @@ class DFSRouter {
             next();
         }
     }
+    private isAlive(req: Request, res: Response, next: NextFunction) {
+        res.json({"alive": true});
+    }
     public routes() {
-        this.router.get("/", this.listFiles);
+        this.router.get("/list", this.listFiles);
+        this.router.get("/is_alive", this.isAlive);
     }
 }
 
