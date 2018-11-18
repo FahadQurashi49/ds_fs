@@ -1,7 +1,6 @@
 import * as http from 'http';
 import * as debug from 'debug';
 import * as fs from 'fs';
-import * as request from 'request';
 
 import config from './config';
 import Server from './server';
