@@ -10,9 +10,7 @@ class FileSystem {
             this.readLocalDir((localFileDir: File[], err?: any) => {
                 if (config.isMaster) {
                     remoteServer.getFromRemote('dfs/list/').then((allData: any[]) => {
-                        // console.log("remote data: ", allData);
                         allData.forEach((data => {
-                            
                             localFileDir = localFileDir.concat(data.files);
                         }));
                         res.json({"files": localFileDir });
@@ -27,8 +25,19 @@ class FileSystem {
             next();
         }
     }
+
+    public createFile = (req: Request, res: Response, next: NextFunction) => {    
+        fs.writeFile(config.dir + "/" + req.body.filename, "", (err) => {
+            if (err) {
+                res.status(500).json({"error": err})
+                return;
+            } 
+            res.json({"result": "ok"});
+        })
+    };
+
     private readLocalDir(callback: (localFileDir: File[], err?: any) => void) {
-        let dirPath = config.dir + '/';
+        let dirPath = config.dir + '/'; 
             let fileDir: File[] = [];
             fs.readdir(dirPath, (err: any, files: string[]) => {
                 if (err) {
