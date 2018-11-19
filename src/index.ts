@@ -31,7 +31,11 @@ function initServer() {
     server.on('error', onError);
     server.on('listening', onListening);
   });
-  
+  /* for debugging only :) */
+  /* config.isMaster = true;
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening); */
 
 }
 
