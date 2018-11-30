@@ -2,7 +2,7 @@ import * as path from 'path';
 
 export class File {
     public extension: string;
-    constructor(public name: string, public dateCreated?: string, 
+    constructor(public name: string, public serverName, public dateCreated?: string, 
         public dateModified?: string, public size?: string) {
             this.size = this.formatBytes(size);
             this.extension = path.extname(name);

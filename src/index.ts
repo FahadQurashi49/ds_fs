@@ -19,24 +19,14 @@ function initServer() {
   if (!fs.existsSync(config.dir)) {
     fs.mkdirSync(config.dir);
   }
-
-  remoteServer.isAnyAlive().then((isAlive:boolean) => {
-    config.isMaster = !isAlive;
-    if (config.isMaster) {
-      console.log("running server as master!");
-    } else {
-      console.log("running server as slave!");
-    }
-    server.listen(port);
-    server.on('error', onError);
-    server.on('listening', onListening);
-  });
-  /* for debugging only :) */
-  /* config.isMaster = true;
+  if (config.isMaster) {
+    console.log("running server as master");
+  } else {
+    console.log("running server as slave");
+  }
   server.listen(port);
   server.on('error', onError);
-  server.on('listening', onListening); */
-
+  server.on('listening', onListening);
 }
 
 function normalizePort(val: number|string): number|string|boolean {
