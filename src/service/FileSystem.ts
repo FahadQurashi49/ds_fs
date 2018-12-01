@@ -47,10 +47,9 @@ class FileSystem {
                         let fileStats = fs.statSync(dirPath + file);
                         if (fileStats) {
                             let fileId = file + "" + fileStats.birthtimeMs;
-                            let fileUrl = serverName + "/dfs/download/" + file;
                             fileDir.push(
                                 new File(fileId, file, 
-                                    fileUrl, fileStats.birthtime.toDateString(), 
+                                    fileStats.birthtime.toDateString(), 
                                     fileStats.mtime.toDateString(), fileStats.size.toString()));
                         }
                     }
@@ -67,15 +66,30 @@ class FileSystem {
     public getFile = (req: Request, res: Response, next: NextFunction) => {
         let fileId = req.params.id;
         let file:File = this.FileTable[fileId];
-        remoteServer.getRemoteFile(file.url).then((resp: any) => {
-            res.send(resp);
-        }).catch(err => { console.error("err", err); res.send(err) });
+        if (file.extension === ".txt") {
+            remoteServer.getRemoteFile(file.url).then((resp: any) => {
+                res.send(resp);
+            }).catch(err => { console.error("err", err); res.send(err) });
+        }
+        
 
+    };
+
+    public downloadTextFile = (req: Request, res: Response, next: NextFunction) => {
+        let fileName = req.params.file;
+        let filePath = config.dir + '/' + fileName;
+        
+        fs.readFile(filePath, (err, data: Buffer) => {
+            if (err) {
+                res.send("error in reading file");
+            }
+            res.json({"content": data.toString()});
+        });
     };
 
     public downloadFile = (req: Request, res: Response, next: NextFunction) => {
         let fileName = req.params.file;
-        let filePath = __dirname + '/fs/' + fileName;
+        let filePath = config.dir + '/' + fileName;
         res.download(filePath);
     };
 

@@ -2,10 +2,12 @@ import * as path from 'path';
 
 export class File {
     public extension: string;
-    constructor(public fileId: string, public name, public url: string, public dateCreated?: string, 
-        public dateModified?: string, public size?: string) {
+    public url: string;
+    constructor(public fileId: string, public name, public serverName, public dateCreated?: string, 
+        public dateModified?: string, public size?: string) {            
             this.size = this.formatBytes(size);
             this.extension = path.extname(name);
+            this.url = serverName + this.extension === ".txt"? "/dfs/downloadText/": "/dfs/download/" + name;
     }
     private formatBytes(bytes, decimals?) {
         if(bytes == 0) return '0 Bytes';
