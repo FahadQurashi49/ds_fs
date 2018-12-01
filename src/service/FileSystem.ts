@@ -47,7 +47,7 @@ class FileSystem {
                         let fileStats = fs.statSync(dirPath + file);
                         if (fileStats) {
                             let fileId = file + "" + fileStats.birthtimeMs;
-                            let fileUrl = serverName + config.dir.substring(1) + "/" + file;
+                            let fileUrl = serverName + "/dfs/download/" + file;
                             fileDir.push(
                                 new File(fileId, file, 
                                     fileUrl, fileStats.birthtime.toDateString(), 
@@ -63,6 +63,21 @@ class FileSystem {
                 
             });
     }
+
+    public getFile = (req: Request, res: Response, next: NextFunction) => {
+        let fileId = req.params.id;
+        let file:File = this.FileTable[fileId];
+        remoteServer.getRemoteFile(file.url).then((resp: any) => {
+            res.send(resp);
+        }).catch(err => { console.error("err", err); res.send(err) });
+
+    };
+
+    public downloadFile = (req: Request, res: Response, next: NextFunction) => {
+        let fileName = req.params.file;
+        let filePath = __dirname + '/fs/' + fileName;
+        res.download(filePath);
+    };
 
     public createFile = (req: Request, res: Response, next: NextFunction) => {    
         fs.writeFile(config.dir + "/" + req.body.filename, "", (err) => {

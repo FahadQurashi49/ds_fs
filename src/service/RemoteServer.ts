@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import * as Promise from 'promise';
 import config from '../config';
 import * as fs from 'fs';
@@ -76,6 +76,15 @@ class RemoteServer {
         return this.failServers.map((fileServer: FileServer) => {
             return axios.get(fileServer.replica_address + url).catch(err => {console.error("error on: ", fileServer.serverName) })
         })
+    }
+
+    public getRemoteFile(fileUrl: string) {
+        return new Promise((resolve, reject) => {
+            axios.get(fileUrl).then((res: AxiosResponse<any>) => {
+                resolve(res);
+            }).catch(err => reject("could not get file: " + fileUrl));
+        });
+        
     }
 }
 
