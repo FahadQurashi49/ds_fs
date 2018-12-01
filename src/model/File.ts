@@ -7,7 +7,7 @@ export class File {
         public dateModified?: string, public size?: string) {            
             this.size = this.formatBytes(size);
             this.extension = path.extname(name);
-            this.url = serverName + this.extension === ".txt"? "/dfs/downloadText/": "/dfs/download/" + name;
+            this.url = serverName + (this.extension === ".txt"? "/dfs/downloadText/": "/dfs/download/") + name;
     }
     private formatBytes(bytes, decimals?) {
         if(bytes == 0) return '0 Bytes';
