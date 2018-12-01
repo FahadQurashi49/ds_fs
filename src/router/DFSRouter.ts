@@ -18,7 +18,7 @@ class DFSRouter {
         this.router.get("/getFile/:id", fileSystem.getFile);
         this.router.get("/downloadText/:file", fileSystem.downloadTextFile);
         this.router.get("/download/:file", fileSystem.downloadFile);
-        this.router.post("/create", fileSystem.createFile);
+        this.router.post("/createFile", fileSystem.createFile);
     }
 }
 
