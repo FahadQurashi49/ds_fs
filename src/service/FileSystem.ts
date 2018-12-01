@@ -66,14 +66,29 @@ class FileSystem {
     public getFile = (req: Request, res: Response, next: NextFunction) => {
         let fileId = req.params.id;
         let file: File = this.FileTable[fileId];
-        if(file) {
-            remoteServer.getRemoteFile(file.url).then((resp: any) => {
-            res.json(resp);
-        }).catch(err => { console.error("err", err); res.json({"err": err}) });
+        if (file) {
+            if (file.extension === ".txt") {
+                remoteServer.getRemoteFile(file).then((resp: any) => {
+                    res.json(resp);
+                }).catch(err => { console.error("err", err); res.json({ "err": err }) });
+            } else {
+                remoteServer.isAlive(file.serverName + 'dfs/is_alive').then(()=>{
+                    res.redirect(file.url);
+                }).catch((err) => {
+                    console.log("getting from replica");
+                    remoteServer.isAlive(config.replica_map[file.serverName] + 'dfs/is_alive').then(()=>{
+                        res.redirect(file.replicaUrl);
+                    }).catch((err) => {
+                        res.json({ "err": "file not available!" })
+                    
+                    });
+                });
+                
+            }
+
         } else {
-            res.json({"status": "file table not ready"})
+            res.json({ "status": "file table not ready" })
         }
-        
     };
 
     public downloadTextFile = (req: Request, res: Response, next: NextFunction) => {

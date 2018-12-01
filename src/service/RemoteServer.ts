@@ -78,16 +78,42 @@ class RemoteServer {
         })
     }
 
-    public getRemoteFile(fileUrl: string) {
+    public getRemoteFile(file: File) {
         return new Promise((resolve, reject) => {
-            axios.get(fileUrl).then((res: AxiosResponse<any>) => {
+            axios.get(file.url).then((res: AxiosResponse<any>) => {
                 if (res && res.data) {
                     resolve(res.data);
                 } else {
                     reject("error in getting file");
                 }
 
-            }).catch(err => reject("error in getting file"));
+            }).catch((err) => {
+                axios.get(file.replicaUrl).then((res: AxiosResponse<any>) => {
+                    if (res && res.data) {
+                        resolve(res.data);
+                    } else {
+                        reject("error in getting file");
+                    }
+    
+                }).catch(err => reject("file not available"));
+            });
+        });
+    }
+
+    public isAlive(url) {
+        return new Promise((resolve, reject) => {
+            axios.get(url).then((res: AxiosResponse<any>) => {
+                if (res && res.data) {
+                    if (res.data.alive) {
+                        resolve();
+                    } else {
+                        reject()
+                    }
+                    
+                } else {
+                    reject();
+                }
+            }).catch(err => reject())
         });
     }
 }
