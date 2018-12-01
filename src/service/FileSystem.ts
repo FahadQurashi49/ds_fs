@@ -11,11 +11,14 @@ class FileSystem {
     public listFiles = (req: Request, res: Response, next: NextFunction) => {
         try {
             if (config.isMaster) {
-                remoteServer.getFromRemote('dfs/list/').then((allData: File[]) => {
-                    allData.forEach((file:File) => {
-                        this.FileTable[file.serverName + file.name] = file;
+                remoteServer.getFromRemote('dfs/list/').then((allData: any[]) => {
+                    let allFileData: File[] = [];
+                    allData.forEach((data:any) => {
+                        allFileData = allFileData.concat(data.files);
                     });
-                    res.json({ "files": allData });
+                    allFileData.forEach((file:File) => this.FileTable[file.fileId] = file);
+                    console.table(this.FileTable);
+                    res.json({ "files": allFileData });
                 }).catch(err => { console.error("err", err); next(); });
             } else {
                 let serverName = req.protocol + '://' + req.get('host');
@@ -43,9 +46,12 @@ class FileSystem {
                     for (let file of files) {
                         let fileStats = fs.statSync(dirPath + file);
                         if (fileStats) {
-                            fileDir.push(new File(file, serverName, fileStats.birthtime.toDateString(), fileStats.mtime.toDateString(), fileStats.size.toString()));
-                        } else {
-                            fileDir.push(new File(file, serverName));
+                            let fileId = file + "" + fileStats.birthtimeMs;
+                            let fileUrl = serverName + config.dir.substring(1) + "/" + file;
+                            fileDir.push(
+                                new File(fileId, file, 
+                                    fileUrl, fileStats.birthtime.toDateString(), 
+                                    fileStats.mtime.toDateString(), fileStats.size.toString()));
                         }
                     }
                     callback(fileDir);

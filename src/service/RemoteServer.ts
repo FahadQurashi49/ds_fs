@@ -30,15 +30,16 @@ class RemoteServer {
     }
     public getFromRemote(url: string) {
         return new Promise((resolve, reject) => {
+            this.failServers = [];
             let promiseArray = this.getPromiseArray(url);
             axios.all(promiseArray).then((res: any[]) => {
-                let allData: File[] = [];
+                let allData: any[] = [];
                 if (res && res.length > 0) {
                     res.forEach((r: any, i) => {
                         if (r && r.data) {
                             allData.push(r.data);
                         } else {
-                            this.failServers.push(config.fileServers[i]);
+                            // this.failServers.push(config.fileServers[i]);
                         }
                     });
                     this.checkFailServers(url, allData, resolve, reject);
@@ -49,6 +50,7 @@ class RemoteServer {
 
     private checkFailServers(url: string, allData: File[], resolve, reject) {
         if (this.failServers.length > 0) {
+            console.log("failserver: ", this.failServers);
             axios.all(this.getFailServerPromiseArray(url)).then((res: any[]) => {
                 res.forEach((r: any) => {
                     if (r && r.data) {
@@ -58,22 +60,21 @@ class RemoteServer {
                 resolve(allData);
             }).catch(err => reject(err));
         } else {
+            console.log("not calling fail server!");
             resolve(allData);
         }
     }
 
     private getPromiseArray(url) {
-        this.failServers = [];
 
         return config.fileServers.map((fileServer: FileServer) => {
-            axios.get(fileServer.address + url).catch(err => { })
+            return axios.get(fileServer.address + url).catch(err => { this.failServers.push(fileServer) })
         })
     }
     private getFailServerPromiseArray(url) {
-        this.failServers = [];
 
         return this.failServers.map((fileServer: FileServer) => {
-            axios.get(fileServer.replica_address + url).catch(err => { })
+            return axios.get(fileServer.replica_address + url).catch(err => {console.error("error on: ", fileServer.serverName) })
         })
     }
 }
