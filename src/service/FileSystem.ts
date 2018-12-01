@@ -21,7 +21,7 @@ class FileSystem {
                     res.json({ "files": allFileData });
                 }).catch(err => { console.error("err", err); next(); });
             } else {
-                let serverName = req.protocol + '://' + req.get('host');
+                let serverName = req.protocol + '://' + req.get('host') + "/";
                 this.readLocalDir(serverName, config.dir, (localFileDir: File[], err?: any) => {
                     res.json({ "files": localFileDir });
                 })
@@ -65,14 +65,15 @@ class FileSystem {
 
     public getFile = (req: Request, res: Response, next: NextFunction) => {
         let fileId = req.params.id;
-        let file:File = this.FileTable[fileId];
-        if (file.extension === ".txt") {
+        let file: File = this.FileTable[fileId];
+        if(file) {
             remoteServer.getRemoteFile(file.url).then((resp: any) => {
-                res.send(resp);
-            }).catch(err => { console.error("err", err); res.send(err) });
+            res.json(resp);
+        }).catch(err => { console.error("err", err); res.json({"err": err}) });
+        } else {
+            res.json({"status": "file table not ready"})
         }
         
-
     };
 
     public downloadTextFile = (req: Request, res: Response, next: NextFunction) => {

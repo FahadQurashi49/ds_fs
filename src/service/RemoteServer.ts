@@ -81,10 +81,14 @@ class RemoteServer {
     public getRemoteFile(fileUrl: string) {
         return new Promise((resolve, reject) => {
             axios.get(fileUrl).then((res: AxiosResponse<any>) => {
-                resolve(res);
-            }).catch(err => reject("could not get file: " + fileUrl));
+                if (res && res.data) {
+                    resolve(res.data);
+                } else {
+                    reject("error in getting file");
+                }
+
+            }).catch(err => reject("error in getting file"));
         });
-        
     }
 }
 

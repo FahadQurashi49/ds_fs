@@ -1,13 +1,17 @@
 import * as path from 'path';
+import config from '../config';
 
 export class File {
     public extension: string;
     public url: string;
+    public replicaUrl: string;
     constructor(public fileId: string, public name, public serverName, public dateCreated?: string, 
         public dateModified?: string, public size?: string) {            
             this.size = this.formatBytes(size);
             this.extension = path.extname(name);
-            this.url = serverName + (this.extension === ".txt"? "/dfs/downloadText/": "/dfs/download/") + name;
+            let urlPath = (this.extension === ".txt"? "dfs/downloadText/": "dfs/download/") + name;
+            this.url = serverName + urlPath;
+            this.replicaUrl = config.replica_map[serverName] + urlPath;
     }
     private formatBytes(bytes, decimals?) {
         if(bytes == 0) return '0 Bytes';
