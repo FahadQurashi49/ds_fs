@@ -48,7 +48,7 @@ class FileSystem {
                         if (fileStats) {
                             let fileId = file + "" + fileStats.birthtimeMs;
                             fileDir.push(
-                                new File(fileId, file, 
+                                new File(fileId, file, serverName,
                                     fileStats.birthtime.toDateString(), 
                                     fileStats.mtime.toDateString(), fileStats.size.toString()));
                         }
