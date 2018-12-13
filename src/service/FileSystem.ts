@@ -133,14 +133,23 @@ class FileSystem {
     };
 
     public createFile = (req: Request, res: Response, next: NextFunction) => {
-        remoteServer.testCreateFile(req.body, (file: File) => {
+        try {
+            remoteServer.initFileServerStack();
+            remoteServer.testCreateFile(req.body, (file?: File) => {
             if (file) {
                 this.FileTable[file.fileId] = file;
                 res.json({"file": file});
+                
             } else {
-                res.json("failed to create file!");
+                res.json({"result": "failed"});
             }
-        })
+            console.log(config.fileServers);
+        });
+        } catch(e) {
+            console.error("error: ", e);
+            res.json({"result": e});
+            next();
+        }
     };
 
     public isAlive(req: Request, res: Response, next: NextFunction) {

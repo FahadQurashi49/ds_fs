@@ -137,7 +137,7 @@ class RemoteServer {
 
     public testCreateFile(reqBody: any, callBack: (file?: File) => void) {
         let fileServer = this.fileSeversStack.pop();
-        let url = "/dfs/creteLocalFile"
+        let url = "dfs/createLocalFile"
         if (fileServer) {
             axios.post(fileServer.address + url, reqBody).then((res: AxiosResponse<any>) => {
                 if (res && res.data) {
@@ -150,16 +150,18 @@ class RemoteServer {
                         this.testCreateFile(reqBody, callBack);
                     }
                 }
-            }).catch();
+            }).catch(err => this.testCreateFile(reqBody, callBack));
         } else {
             callBack();
         }
     }
 
     public initFileServerStack() {
+        this.fileSeversStack = [];
         config.fileServers.forEach((fileServer) => {
             this.fileSeversStack.push(fileServer);
         });
+        this.fileSeversStack.reverse();
     }
 }
 
