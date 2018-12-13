@@ -12,6 +12,7 @@ import { RSA_NO_PADDING } from 'constants';
 
 class RemoteServer {
     private failServers: FileServer[];
+    private fileSeversStack: FileServer[];
     public isAnyAlive() {
         return new Promise((resolve, reject) => {
             let isAlive = false;
@@ -74,7 +75,7 @@ class RemoteServer {
     private getFailServerPromiseArray(url) {
 
         return this.failServers.map((fileServer: FileServer) => {
-            return axios.get(fileServer.replica_address + url).catch(err => {console.error("error on: ", fileServer.serverName) })
+            return axios.get(fileServer.replica_address + url).catch(err => { console.error("error on: ", fileServer.serverName) })
         })
     }
 
@@ -94,7 +95,7 @@ class RemoteServer {
                     } else {
                         reject("error in getting file");
                     }
-    
+
                 }).catch(err => reject("file not available"));
             });
         });
@@ -109,11 +110,55 @@ class RemoteServer {
                     } else {
                         reject()
                     }
-                    
+
                 } else {
                     reject();
                 }
             }).catch(err => reject())
+        });
+    }
+
+    /* public createRemoteFile(reqBody: any) {
+        for (let i = 0; i < config.fileServers.length; i++){
+            let fileServer = config.fileServers[i];
+            axios.post(fileServer.address, reqBody).then((res: AxiosResponse<any>) => {
+                if (res && res.data) {
+                    if (res.data.result === "ok") {
+                        
+                    } else {
+                        
+                    }
+                    
+                }
+            });
+        }
+        
+    } */
+
+    public testCreateFile(reqBody: any, callBack: (file?: File) => void) {
+        let fileServer = this.fileSeversStack.pop();
+        let url = "/dfs/creteLocalFile"
+        if (fileServer) {
+            axios.post(fileServer.address + url, reqBody).then((res: AxiosResponse<any>) => {
+                if (res && res.data) {
+                    if (res.data.result === "ok") {
+                        let file: File = res.data.file;
+                        axios.post(fileServer.replica_address, reqBody).then((res: AxiosResponse<any>) => {
+                            callBack(file);
+                        }).catch(e => callBack(file));
+                    } else {
+                        this.testCreateFile(reqBody, callBack);
+                    }
+                }
+            }).catch();
+        } else {
+            callBack();
+        }
+    }
+
+    public initFileServerStack() {
+        config.fileServers.forEach((fileServer) => {
+            this.fileSeversStack.push(fileServer);
         });
     }
 }

@@ -109,13 +109,37 @@ class FileSystem {
         res.download(filePath);
     };
 
-    public createFile = (req: Request, res: Response, next: NextFunction) => {    
-        fs.writeFile(config.dir + "/" + req.body.filename, "", (err) => {
+    public createLocalFile = (req: Request, res: Response, next: NextFunction) => {
+        let fileName = req.body.filename;
+        let filePath = config.dir + "/" + req.body.filename;
+        fs.writeFile(filePath, "", (err) => {
             if (err) {
                 res.status(500).json({"error": err})
                 return;
-            } 
-            res.json({"result": "ok"});
+            }
+            let fileStats = fs.statSync(filePath);
+            let file;
+            if (fileStats) {
+                let fileId = fileName + "" + fileStats.birthtimeMs;
+                let serverName = req.protocol + '://' + req.get('host') + "/";
+                file =
+                    new File(fileId, fileName, serverName,
+                        fileStats.birthtime.toDateString(), 
+                        fileStats.mtime.toDateString(), fileStats.size.toString());
+            }
+
+            res.json({"result": "ok", "file": file});
+        })
+    };
+
+    public createFile = (req: Request, res: Response, next: NextFunction) => {
+        remoteServer.testCreateFile(req.body, (file: File) => {
+            if (file) {
+                this.FileTable[file.fileId] = file;
+                res.json({"file": file});
+            } else {
+                res.json("failed to create file!");
+            }
         })
     };
 
