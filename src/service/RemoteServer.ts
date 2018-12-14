@@ -143,7 +143,7 @@ class RemoteServer {
                 if (res && res.data) {
                     if (res.data.result === "ok") {
                         let file: File = res.data.file;
-                        axios.post(fileServer.replica_address, reqBody).then((res: AxiosResponse<any>) => {
+                        axios.post(fileServer.replica_address + url, reqBody).then((res: AxiosResponse<any>) => {
                             callBack(file);
                         }).catch(e => callBack(file));
                     } else {

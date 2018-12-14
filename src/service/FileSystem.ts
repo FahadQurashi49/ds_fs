@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import * as fs from 'fs';
+import * as _ from 'lodash';
+
+
 import { File } from '../model/File';
 import config from '../config';
 import remoteServer from './RemoteServer'
@@ -134,6 +137,10 @@ class FileSystem {
 
     public createFile = (req: Request, res: Response, next: NextFunction) => {
         try {
+            if (_.find(_.values(this.FileTable), {"name": req.body.filename})) {
+                res.json({"result": "file already exists"});
+                return;
+            }
             remoteServer.initFileServerStack();
             remoteServer.testCreateFile(req.body, (file?: File) => {
             if (file) {
@@ -143,7 +150,6 @@ class FileSystem {
             } else {
                 res.json({"result": "failed"});
             }
-            console.log(config.fileServers);
         });
         } catch(e) {
             console.error("error: ", e);
