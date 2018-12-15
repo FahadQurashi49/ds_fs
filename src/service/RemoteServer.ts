@@ -8,6 +8,10 @@ import { FileServer } from '../model/FileServer';
 import FileSystem from './FileSystem';
 import { File } from '../model/File';
 import { RSA_NO_PADDING } from 'constants';
+import * as fileUpload from 'express-fileupload';
+import * as blobUtil from 'blob-util';
+import * as FormData from 'form-data';
+import { Request, Response, NextFunction } from 'express';
 
 
 class RemoteServer {
@@ -163,6 +167,30 @@ class RemoteServer {
         });
         this.fileSeversStack.reverse();
     }
+
+    public uploadRemoteFile(req: Request, url: string, callBack: (file: File) => void) {
+        let formData = new FormData();
+        /* let buffer = Buffer.from(file.data);
+        let arraybuffer = Uint8Array.from(buffer).buffer;
+        let blob = blobUtil.arrayBufferToBlob(arraybuffer); */
+        // formData.append("sampleFile", file);
+        axios.post(url, req.files, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+        }).then((res: AxiosResponse<any>) => {
+            if (res.data.result === "ok") {
+                callBack(res.data.file);
+            } else{
+                callBack(null);
+            }
+        }).catch(err => {console.error(err); callBack(null);});
+    }
+
+    /* public uploadRemoteFile(req: Request, url: string, callBack: (file: File) => void) {
+
+    } */
+
 }
 
 export default new RemoteServer();

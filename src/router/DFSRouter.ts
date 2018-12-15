@@ -20,6 +20,8 @@ class DFSRouter {
         this.router.get("/download/:file", fileSystem.downloadFile);
         this.router.post("/createFile", fileSystem.createFile);
         this.router.post("/createLocalFile", fileSystem.createLocalFile);
+        this.router.post("/uploadLocalFile", fileSystem.uploadLocalFile);
+        this.router.post("/uploadFile", fileSystem.uploadFile);
     }
 }
 

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as fs from 'fs';
 import * as _ from 'lodash';
+import * as fileUpload from 'express-fileupload';
 
 
 import { File } from '../model/File';
@@ -157,6 +158,68 @@ class FileSystem {
             next();
         }
     };
+
+    public uploadFile = (req: Request, res: Response, next: NextFunction) => {
+        try{
+            if (Object.keys(req.files).length == 0) {
+                return res.status(400).send('No files were uploaded.');
+            }
+            let file = _.find(_.values(this.FileTable), {"name": req.body.filename}) as File;
+            if (file) {
+                let server = file.serverName;
+            } else {
+                let sampleFile: fileUpload.UploadedFile = req.files.sampleFile as fileUpload.UploadedFile;
+                remoteServer.uploadRemoteFile(req, config.fileServers[0].address + 'dfs/uploadLocalFile', (file) => {
+                    if (file) {
+                        res.json({"file": file});
+                    } else {
+                        res.json({"result": "failed"});
+                    }
+                })
+            }
+
+        } catch (e) {
+            console.error("error: ", e);
+            res.json({"result": e});
+            next();
+        }
+    }; 
+
+    public uploadLocalFile = (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (Object.keys(req.files).length == 0) {
+                return res.status(400).send('No files were uploaded.');
+            }
+            console.log("files: ", req.files);
+            
+            let sampleFile: fileUpload.UploadedFile = req.files.sampleFile as fileUpload.UploadedFile;
+            console.log("sampleFile: ", sampleFile);
+            let fileName = sampleFile.name;
+            let filePath = config.dir + "/" + fileName;
+            sampleFile.mv(filePath, function (err) {
+                if (err)
+                    return res.status(500).send(err);
+                
+                let fileStats = fs.statSync(filePath);
+                let file;
+                if (fileStats) {
+                    let fileId = fileName + "" + fileStats.birthtimeMs;
+                    let serverName = req.protocol + '://' + req.get('host') + "/";
+                    file =
+                        new File(fileId, fileName, serverName,
+                            fileStats.birthtime.toDateString(),
+                            fileStats.mtime.toDateString(), fileStats.size.toString());
+                }
+
+                res.json({ "result": "ok", "file": file });
+            });
+        } catch (err) {
+            console.error(err);
+            res.json({ "result": "failed" });
+            next();
+        }
+
+    }
 
     public isAlive(req: Request, res: Response, next: NextFunction) {
         res.json({"alive": true});
