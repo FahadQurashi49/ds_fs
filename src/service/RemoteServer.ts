@@ -179,7 +179,9 @@ class RemoteServer {
               'Content-Type': 'multipart/form-data'
             }
         }).then((res: AxiosResponse<any>) => {
+            console.log(res.data);
             if (res.data.result === "ok") {
+                console.log(res.data);
                 callBack(res.data.file);
             } else{
                 callBack(null);

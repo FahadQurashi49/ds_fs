@@ -11,7 +11,7 @@ export class File {
             this.extension = path.extname(name);
             let urlPath = (this.extension === ".txt"? "dfs/downloadText/": "dfs/download/") + name;
             this.url = serverName + urlPath;
-            this.replicaUrl = config.replica_map[serverName] + urlPath;
+            this.replicaUrl = (config.replica_map[serverName]? config.replica_map[serverName]: "http://localhost:8081/") + urlPath;
     }
     private formatBytes(bytes, decimals?) {
         if(bytes == 0) return '0 Bytes';
